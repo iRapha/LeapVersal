@@ -1,0 +1,35 @@
+<html>
+
+<head>
+</head>
+
+<body>
+    <div id="output"></div>
+</body>
+
+
+<script src="http://js.leapmotion.com/leap-0.6.3.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+<script type="text/javascript">
+
+var output = $("#output");
+var options = { enableGestured: true };
+
+//main leap loop
+Leap.loop(options, function(frame) {
+    finalString = "";
+    // finalString += "frame: " + frame.id + "<br/>numHands: " + frame.hands.length + "<br/> numFingers: " + frame.fingers.length + "<br/>";
+
+    // for (var i = 0; i < frame.hands.length; i++) {
+    //     finalString += frame.hands[i].type;
+    // }
+
+    finalString += frame.fingers;
+
+    output.html(finalString);
+});
+
+</script>
+
+</html>
