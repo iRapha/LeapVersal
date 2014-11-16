@@ -197,6 +197,31 @@ var letter = alphabet[teacherInput.toUpperCase()];
 
 window.addEventListener('HTMLImportsLoaded', function(){
 
+    var controller = new Leap.Controller();
+    controller.connect();
+    controller.on('connect', function() {
+        timeout = window.setTimeout(function(){
+            output.html('<h1 style="color:red;">Oops. No Leap Motion device connected!</h1>');
+        }, 500);
+        //check for valid frame
+        function validateFrame() {
+            if(controller.frame(0).valid) {
+                window.clearTimeout(timeout);
+                controller.removeListener('frame', validateFrame);
+            }
+        }
+
+        controller.on('frame', validateFrame);
+    });
+
+    controller.on('deviceStopped', function() {
+        output.html('<h1 style="color:red;">Oops. No Leap Motion device connected!</h1>');
+    });
+
+    controller.on('deviceStreaming', function() {
+        output.html('');
+    });
+
   var letterSelector = document.querySelector('[id=letter-selector]');
   var player = new VersalPlayerAPI();
 
@@ -225,12 +250,12 @@ window.addEventListener('HTMLImportsLoaded', function(){
   player.on('editableChanged', function(editableObj){
       if(editableObj.editable) {
         //stuff for author
-        console.log("once");
         $("#message-text").text("Which letter would you like to teach in American Sign Language with the Leap Motion?");
         $("#selector-wrapper").show();
         $("#letter-selector").show();
         $("#instructions").hide();
         output.hide();
+        output.html('');
       } else {
         //stuff for learner
         $("#selector-wrapper").hide();
@@ -240,6 +265,11 @@ window.addEventListener('HTMLImportsLoaded', function(){
         $("#instructions").html('<img src="Images/letter'+teacherInput+'.jpg" style="width:200px; height:200px;">');
         output.show();
         Leap.loop(options, function(frame) {
+
+            //making sure leap motion is connected
+            if(!controller.streaming()) {
+                output.html('<h1 style="color:red;">Oops. No Leap Motion device connected!</h1>');
+            }
 
             for(var i = 0; i < frame.hands.length; i++) {
                 hand = frame.hands[i];
