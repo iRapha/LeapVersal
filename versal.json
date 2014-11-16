@@ -1,7 +1,7 @@
 {
   "launcher": "iframe",
   "name": "test",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "title": "Leap ASL",
   "description": "Sign language teaching tool with Leap Motion for Versal",
   "author": "Raphael Gontijo Lopes & Michelle Chiu",
