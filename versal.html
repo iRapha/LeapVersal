@@ -45,9 +45,33 @@
     </select>
   </div>
 </div>
+
 <div id = "instructions" style="display:inline-block; padding-left:15px;">
 
+<div id="hand-status" style="display:inline-block; height:200px; width:200px; position:relative;">
+    <img src="Images/previews/base.png" style="position:absolute;">
+
+    <img id="img-index-ext" src="Images/previews/index_ext.png" style="position:absolute; display:hidden;">
+    <img id="img-index-semi" src="Images/previews/index_semi.png" style="position:absolute; display:hidden;">
+    <img id="img-index-clos" src="Images/previews/index_clos.png" style="position:absolute; display:hidden;">
+
+    <img id="img-middle-ext" src="Images/previews/middle_ext.png" style="position:absolute; display:hidden;">
+    <img id="img-middle-semi" src="Images/previews/middle_semi.png" style="position:absolute; display:hidden;">
+    <img id="img-middle-clos" src="Images/previews/middle_clos.png" style="position:absolute; display:hidden;">
+
+    <img id="img-ring-ext" src="Images/previews/ring_ext.png" style="position:absolute; display:hidden;">
+    <img id="img-ring-semi" src="Images/previews/ring_semi.png" style="position:absolute; display:hidden;">
+    <img id="img-ring-clos" src="Images/previews/ring_clos.png" style="position:absolute; display:hidden;">
+
+    <img id="img-pinky-ext" src="Images/previews/pinky_ext.png" style="position:absolute; display:hidden;">
+    <img id="img-pinky-semi" src="Images/previews/pinky_semi.png" style="position:absolute; display:hidden;">
+    <img id="img-pinky-clos" src="Images/previews/pinky_clos.png" style="position:absolute; display:hidden;">
+
+    <img id="img-thumb-ext" src="Images/previews/thumb_ext.png" style="position:absolute; display:hidden;">
+    <img id="img-thumb-semi" src="Images/previews/thumb_semi.png" style="position:absolute; display:hidden;">
+    <img id="img-thumb-clos" src="Images/previews/thumb_clos.png" style="position:absolute; display:hidden;">
 </div>
+
 <div id="output"></div>
 
 <style>
@@ -99,7 +123,7 @@ var alphabet = {
     "Y": { fingers: [0, 2, 2, 2, 0] },
     "Z": { fingers: [2, 1, 2, 2, 2] }, //movement in Z form
 };
-var fingerNames = ["THUMB", "INDEX", "MIDDLE", "RING", "PINKY"];
+var fingerNames = ["thumb", "index", "middle", "ring", "pinky"];
 
 //general functions
 function getDotProduct(handPalmNormal, fingerDirection) {
@@ -134,15 +158,36 @@ function getFingerPosition(finger, hand) {
     }
 }
 
+function updateDynamicImages(fingerPosition, fingerType) {
+    if(fingerPosition === 0) {
+        $("#img-"+fingerNames[fingerType]+"-ext").show();
+        $("#img-"+fingerNames[fingerType]+"-semi").hide();
+        $("#img-"+fingerNames[fingerType]+"-clos").hide();
+    }else if(fingerPosition === 1) {
+        $("#img-"+fingerNames[fingerType]+"-ext").hide();
+        $("#img-"+fingerNames[fingerType]+"-semi").show();
+        $("#img-"+fingerNames[fingerType]+"-clos").hide();
+    }else {
+        $("#img-"+fingerNames[fingerType]+"-ext").hide();
+        $("#img-"+fingerNames[fingerType]+"-semi").hide();
+        $("#img-"+fingerNames[fingerType]+"-clos").show();
+    }
+}
+
 function getFingerStatus(finger, hand) {
     var fingerPosition = getFingerPosition(finger, hand);
 
+    updateDynamicImages(fingerPosition, finger.type);
+
     if(fingerPosition === letter.fingers[finger.type]) {
-        return "OK!";
+        //finger correct!
+        return true;
     }else if (fingerPosition > letter.fingers[finger.type]) {
-        return "TOO CLOSED";
+        //finger too closed
+        return false;
     }else {
-        return "TOO EXTENDED";
+        //finger too extended
+        return false;
     }
 }
 
@@ -168,6 +213,7 @@ window.addEventListener('HTMLImportsLoaded', function(){
   player.on('editableChanged', function(editableObj){
       if(editableObj.editable) {
         //stuff for author
+        console.log("once");
         $("#message-text").text("Which letter would you like to teach in American Sign Language with the Leap Motion?");
         $("#selector-wrapper").show();
         $("#letter-selector").show();
@@ -176,33 +222,30 @@ window.addEventListener('HTMLImportsLoaded', function(){
       } else {
         //stuff for learner
         $("#selector-wrapper").hide();
-        $("#message-text").text("Please use your Leap Motion to do the letter " + teacherInput.toUpperCase() + " in American Sign Language.");
+        $("#message-text").text("Please click here and then use your Leap Motion to do the letter " + teacherInput.toUpperCase() + " in American Sign Language.");
         $("#letter-selector").hide();
         $("#instructions").show();
         $("#instructions").html('<img src="Images/letter'+teacherInput+'.jpg" style="width:200px; height:200px;">');
         output.show();
         Leap.loop(options, function(frame) {
-            finalString = "";
 
             for(var i = 0; i < frame.hands.length; i++) {
                 hand = frame.hands[i];
                 fingers = hand.fingers;
-
-                finalString += hand.palmNormal + "<br/><br/>";
+                var correctFingers = 0;
 
                 for(var k = 0; k < fingers.length; k++) {
-                    finger = fingers[k];
+                    if(getFingerStatus(fingers[k], hand)) {
+                        correctFingers++;
+                    }
+                }
 
-                    finalString += fingerNames[finger.type] + ": ";
-                    finalString += getFingerStatus(finger, hand);
-                    finalString += "<br/><br/>";
-
+                if(correctFingers === 5) {
+                    //display HEY GOOD JOB message!
+                    output.html('<h1 style="color:green;">GOOD JOB!</h1>');
                 }
             }
-
-            output.html(finalString);
         });
-            //once all are ok, stop demo and display success message
       }
   });
 
