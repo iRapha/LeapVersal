@@ -1,0 +1,10 @@
+{
+  "launcher": "iframe",
+  "name": "test",
+  "version": "0.0.1",
+  "title": "My gadget",
+  "description": "Sign language teaching tool with Leap Motion for Versal",
+  "author": "Raphael Gontijo Lopes and Michelle Chiu",
+  "defaultConfig": {},
+  "defaultUserState": {}
+}

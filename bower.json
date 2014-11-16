@@ -1,0 +1,23 @@
+{
+  "name": "LeapVersal",
+  "version": "0.0.2",
+  "authors": [
+    "Raphael Gontijo Lopes <raphaelgontijolopes@gmail.com>",
+    "Michelle Chiu <michellechiu96@gmail.com>"
+  ],
+  "description": "Sign language teaching tool with Leap Motion for Versal",
+  "main": "versal.html",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "versal-gadget-api": "0.0.1",
+    "versal-component-runtime": "~0.2.4"
+  }
+}

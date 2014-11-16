@@ -1,21 +1,34 @@
+<!DOCTYPE html>
 <html>
-
 <head>
+<title>Empty gadget</title>
+<script src="bower_components/versal-component-runtime/dist/runtime.min.js"></script>
+<link rel="import" href="bower_components/versal-gadget-api/versal-gadget-api.html">
 </head>
 
 <body>
-    <div id="output"></div>
-</body>
 
+<div id="output" style="min-height:600px;"></div>
+
+<style>
+input {
+  font-size: 20px;
+  padding: 5px;
+  min-width: 300px;
+}
+input[readonly] {
+  border: 1px solid transparent;
+}
+</style>
+</body>
 
 <script src="http://js.leapmotion.com/leap-0.6.3.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
-<script type="text/javascript">
-
+<script>
+//general vars
 var output = $("#output");
 var options = { enableGestured: true };
-
 //each element of "fingers" is a "closed-ness" measure. 0 is extended, 1 is semi, 2 is closed
 var alphabet = {
     "A": { fingers: [1, 2, 2, 2, 2] }, //first finger cant be closed
@@ -45,7 +58,9 @@ var alphabet = {
     "Y": { fingers: [0, 2, 2, 2, 0] },
     "Z": { fingers: [2, 1, 2, 2, 2] }, //movement in Z form
 };
+var fingerNames = ["THUMB", "INDEX", "MIDDLE", "RING", "PINKY"];
 
+//general functions
 function getDotProduct(handPalmNormal, fingerDirection) {
     result = 0.0;
     result += handPalmNormal[0] * fingerDirection[0];
@@ -56,17 +71,21 @@ function getDotProduct(handPalmNormal, fingerDirection) {
 
 function getFingerPosition(finger, hand) {
     if(finger.type != 0) {
-        if (getDotProduct(hand.palmNormal, finger.direction) < 0.6 && finger.extended) {
+        var dotProduct = getDotProduct(hand.palmNormal, finger.direction);
+
+        if (dotProduct < 0.6 && finger.extended) {
             return 0;
-        } else if (getDotProduct(hand.palmNormal, finger.direction) < 0.85 && !finger.extended) {
+        } else if (dotProduct < 0.85 && !finger.extended) {
             return 2;
         } else {
             return 1;
         }
     } else { //thumb is different
-        if (getDotProduct(hand.direction, finger.direction) < 0.9 && finger.extended) {
+        var dotProduct = getDotProduct(hand.direction, finger.direction);
+
+        if (dotProduct < 0.9 && finger.extended) {
             return 0;
-        } else if (getDotProduct(hand.direction, finger.direction) < 0.8 && !finger.extended) {
+        } else if (dotProduct < 0.8 && !finger.extended) {
             return 2;
         } else {
             return 1;
@@ -74,7 +93,21 @@ function getFingerPosition(finger, hand) {
     }
 }
 
-var teacherInput = "b";
+function getFingerStatus(finger, hand) {
+    var fingerPosition = getFingerPosition(finger, hand);
+
+    if(fingerPosition === letter.fingers[finger.type]) {
+        return "OK!";
+    }else if (fingerPosition > letter.fingers[finger.type]) {
+        return "TOO CLOSED";
+    }else {
+        return "TOO EXTENDED";
+    }
+}
+
+
+//#######
+var teacherInput = "a";
 var letter = alphabet[teacherInput.toUpperCase()];
 
 //main leap loop
@@ -90,36 +123,8 @@ Leap.loop(options, function(frame) {
         for(var k = 0; k < fingers.length; k++) {
             finger = fingers[k];
 
-            // if(finger.type != 0) {
-            //     finalString += getDotProduct(hand.palmNormal, finger.direction);
-            //     finalString += "<br/><br/>FINGER POSITION: ";
-            //     if (getDotProduct(hand.palmNormal, finger.direction) < 0.6 && finger.extended) {
-            //         finalString += "EXTENDED 0";
-            //     } else if (getDotProduct(hand.palmNormal, finger.direction) < 0.85 && !finger.extended) {
-            //         finalString += "CLOSED 2";
-            //     } else {
-            //         finalString += "SEMI 1";
-            //     }
-            // } else { //thumb is different
-            //     finalString += getDotProduct(hand.direction, finger.direction);
-            //     finalString += "<br/><br/>FINGER POSITION: ";
-            //     if (getDotProduct(hand.direction, finger.direction) < 0.9 && finger.extended) {
-            //         finalString += "EXTENDED 0";
-            //     } else if (getDotProduct(hand.direction, finger.direction) < 0.8 && !finger.extended) {
-            //         finalString += "CLOSED 2";
-            //     } else {
-            //         finalString += "SEMI 1";
-            //     }
-            // }
-
-            var fingerPosition = getFingerPosition(finger, hand);
-            finalString += "FINGER " + finger.type + ". Status: ";
-            if(fingerPosition >= letter.fingers[finger.type]) {
-                finalString += "OK.";
-            }else {
-                finalString += "NOT.";
-            }
-
+            finalString += fingerNames[finger.type] + ": ";
+            finalString += getFingerStatus(finger, hand);
             finalString += "<br/><br/>";
 
         }
@@ -127,7 +132,41 @@ Leap.loop(options, function(frame) {
 
     output.html(finalString);
 });
+//########
 
+window.addEventListener('HTMLImportsLoaded', function(){
+
+  var greeting = document.querySelector('[name=greeting]');
+  var learnerName = document.querySelector('[name=learnerName]');
+  var player = new VersalPlayerAPI();
+
+  greeting.addEventListener('change', function(e){
+    player.setAttribute(greeting.name, greeting.value);
+  });
+
+  learnerName.addEventListener('change', function(e){
+    player.setLearnerAttribute(learnerName.name, learnerName.value);
+  });
+
+  player.on('attributesChanged', function(data){
+    if(data.greeting) {
+      greeting.value = data.greeting;
+    };
+  });
+
+  player.on('learnerStateChanged', function(data){
+    if(data.learnerName) {
+      learnerName.value = data.learnerName;
+    };
+  });
+
+  player.on('editableChanged', function(editable){
+    greeting.readOnly = !editable.editable;
+    learnerName.readOnly = editable.editable;
+  });
+
+  player.setHeight(60);
+  player.startListening();
+});
 </script>
-
 </html>
