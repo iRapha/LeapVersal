@@ -4,6 +4,7 @@
 <title>LeapVersal</title>
 <script src="bower_components/versal-component-runtime/dist/runtime.min.js"></script>
 <link rel="import" href="bower_components/versal-gadget-api/versal-gadget-api.html">
+<link rel="stylesheet" href="style.css"/>
 </head>
 
 <body>
@@ -42,6 +43,8 @@
     </select>
 </div>
 
+<div id="instructions"></div>
+
 <div id="hand-status" style="display:inline-block; height:200px; width:200px; position:relative;">
     <img src="Images/previews/base.png" style="position:absolute;">
 
@@ -65,6 +68,7 @@
     <img id="img-thumb-semi" src="Images/previews/thumb_semi.png" style="position:absolute; display:hidden;">
     <img id="img-thumb-clos" src="Images/previews/thumb_clos.png" style="position:absolute; display:hidden;">
 </div>
+
 <div id="output"></div>
 
 <style>
@@ -209,11 +213,14 @@ window.addEventListener('HTMLImportsLoaded', function(){
         console.log("once");
         $("#message-text").text("Which letter would you like to teach in American Sign Language with the Leap Motion?");
         $("#letter-selector").show();
-        output.hide;
+        $("#instructions").hide();
+        output.hide();
       } else {
         //stuff for learner
         $("#message-text").text("Please click here and then use your Leap Motion to do the letter " + teacherInput.toUpperCase() + " in American Sign Language.");
         $("#letter-selector").hide();
+        $("#instructions").show();
+        $("#instructions").html('<img src="Images/letter'+teacherInput+'.jpg" style="width:200px; height:200px;">');
         output.show();
         Leap.loop(options, function(frame) {
 
