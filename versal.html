@@ -13,7 +13,9 @@
     <div id="message-text">
     </div>
     <br/><br/>
-    <select id="letter-selector" name="alphabet" style="display:inline-block;">
+    <div id="selector-wrapper" width="100%" style="text-align:center;">
+    <span class="custom-dropdown custom-dropdown--white">
+    <select id="letter-selector" name="alphabet" style="display:inline-block;" class="custom-dropdown__select custom-dropdown__select--white">
         <option value="A">A</option>
         <option value="B">B</option>
         <option value="C">C</option>
@@ -41,8 +43,9 @@
         <option value="Y">Y</option>
         <option value="Z">Z</option>
     </select>
+  </div>
 </div>
-<div id = "instructions">
+<div id = "instructions" style="display:inline-block; padding-left:15px;">
 
 </div>
 <div id="output"></div>
@@ -166,11 +169,13 @@ window.addEventListener('HTMLImportsLoaded', function(){
       if(editableObj.editable) {
         //stuff for author
         $("#message-text").text("Which letter would you like to teach in American Sign Language with the Leap Motion?");
+        $("#selector-wrapper").show();
         $("#letter-selector").show();
         $("#instructions").hide();
         output.hide();
       } else {
         //stuff for learner
+        $("#selector-wrapper").hide();
         $("#message-text").text("Please use your Leap Motion to do the letter " + teacherInput.toUpperCase() + " in American Sign Language.");
         $("#letter-selector").hide();
         $("#instructions").show();
