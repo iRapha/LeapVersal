@@ -16,16 +16,114 @@
 var output = $("#output");
 var options = { enableGestured: true };
 
+//each element of "fingers" is a "closed-ness" measure. 0 is extended, 1 is semi, 2 is closed
+var alphabet = {
+    "A": { fingers: [1, 2, 2, 2, 2] }, //first finger cant be closed
+    "B": { fingers: [1, 0, 0, 0, 0] },
+    "C": { fingers: [1, 1, 1, 1, 1] },
+    "D": { fingers: [2, 0, 1, 1, 1] },
+    "E": { fingers: [2, 2, 2, 2, 2] },
+    "F": { fingers: [1, 2, 0, 0, 0] },
+    "G": { fingers: [2, 1, 2, 2, 2] }, //hand on side
+    "H": { fingers: [2, 1, 1, 2, 2] }, //hand on side
+    "I": { fingers: [1, 2, 2, 2, 0] },
+    "J": { fingers: [1, 2, 2, 2, 0] }, //movement in J form;  hand in between front and side
+    "K": { fingers: [1, 0, 1, 2, 2] }, //hand in between front and side
+    "L": { fingers: [0, 0, 2, 2, 2] },
+    "M": { fingers: [2, 2, 2, 2, 2] },
+    "N": { fingers: [1, 2, 2, 2, 2] },
+    "O": { fingers: [2, 2, 2, 2, 2] },
+    "P": { fingers: [1, 0, 1, 2, 2] }, //hand facing down
+    "Q": { fingers: [1, 1, 2, 2, 2] }, //hand facing down
+    "R": { fingers: [1, 0, 0, 2, 2] },
+    "S": { fingers: [2, 2, 2, 2, 2] },
+    "T": { fingers: [1, 2, 2, 2, 2] },
+    "U": { fingers: [1, 0, 0, 2, 2], fingersPosition: "together" }, //fingers together
+    "V": { fingers: [1, 0, 0, 2, 2], fingersPosition: "separate" }, //fingers separate
+    "W": { fingers: [1, 0, 0, 0, 1] },
+    "X": { fingers: [2, 1, 2, 2, 2] },
+    "Y": { fingers: [0, 2, 2, 2, 0] },
+    "Z": { fingers: [2, 1, 2, 2, 2] }, //movement in Z form
+};
+
+function getDotProduct(handPalmNormal, fingerDirection) {
+    result = 0.0;
+    result += handPalmNormal[0] * fingerDirection[0];
+    result += handPalmNormal[1] * fingerDirection[1];
+    result += handPalmNormal[2] * fingerDirection[2];
+    return result;
+}
+
+function getFingerPosition(finger, hand) {
+    if(finger.type != 0) {
+        if (getDotProduct(hand.palmNormal, finger.direction) < 0.6 && finger.extended) {
+            return 0;
+        } else if (getDotProduct(hand.palmNormal, finger.direction) < 0.85 && !finger.extended) {
+            return 2;
+        } else {
+            return 1;
+        }
+    } else { //thumb is different
+        if (getDotProduct(hand.direction, finger.direction) < 0.9 && finger.extended) {
+            return 0;
+        } else if (getDotProduct(hand.direction, finger.direction) < 0.8 && !finger.extended) {
+            return 2;
+        } else {
+            return 1;
+        }
+    }
+}
+
+var teacherInput = "b";
+var letter = alphabet[teacherInput.toUpperCase()];
+
 //main leap loop
 Leap.loop(options, function(frame) {
     finalString = "";
-    // finalString += "frame: " + frame.id + "<br/>numHands: " + frame.hands.length + "<br/> numFingers: " + frame.fingers.length + "<br/>";
 
-    // for (var i = 0; i < frame.hands.length; i++) {
-    //     finalString += frame.hands[i].type;
-    // }
+    for(var i = 0; i < frame.hands.length; i++) {
+        hand = frame.hands[i];
+        fingers = hand.fingers;
 
-    finalString += frame.fingers;
+        finalString += hand.palmNormal + "<br/><br/>";
+
+        for(var k = 0; k < fingers.length; k++) {
+            finger = fingers[k];
+
+            // if(finger.type != 0) {
+            //     finalString += getDotProduct(hand.palmNormal, finger.direction);
+            //     finalString += "<br/><br/>FINGER POSITION: ";
+            //     if (getDotProduct(hand.palmNormal, finger.direction) < 0.6 && finger.extended) {
+            //         finalString += "EXTENDED 0";
+            //     } else if (getDotProduct(hand.palmNormal, finger.direction) < 0.85 && !finger.extended) {
+            //         finalString += "CLOSED 2";
+            //     } else {
+            //         finalString += "SEMI 1";
+            //     }
+            // } else { //thumb is different
+            //     finalString += getDotProduct(hand.direction, finger.direction);
+            //     finalString += "<br/><br/>FINGER POSITION: ";
+            //     if (getDotProduct(hand.direction, finger.direction) < 0.9 && finger.extended) {
+            //         finalString += "EXTENDED 0";
+            //     } else if (getDotProduct(hand.direction, finger.direction) < 0.8 && !finger.extended) {
+            //         finalString += "CLOSED 2";
+            //     } else {
+            //         finalString += "SEMI 1";
+            //     }
+            // }
+
+            var fingerPosition = getFingerPosition(finger, hand);
+            finalString += "FINGER " + finger.type + ". Status: ";
+            if(fingerPosition >= letter.fingers[finger.type]) {
+                finalString += "OK.";
+            }else {
+                finalString += "NOT.";
+            }
+
+            finalString += "<br/><br/>";
+
+        }
+    }
 
     output.html(finalString);
 });
