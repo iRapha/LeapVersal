@@ -42,6 +42,9 @@
         <option value="Z">Z</option>
     </select>
 </div>
+<div id = "instructions">
+
+</div>
 <div id="output"></div>
 
 <style>
@@ -164,11 +167,14 @@ window.addEventListener('HTMLImportsLoaded', function(){
         //stuff for author
         $("#message-text").text("Which letter would you like to teach in American Sign Language with the Leap Motion?");
         $("#letter-selector").show();
-        output.hide;
+        $("#instructions").hide();
+        output.hide();
       } else {
         //stuff for learner
         $("#message-text").text("Please use your Leap Motion to do the letter " + teacherInput.toUpperCase() + " in American Sign Language.");
         $("#letter-selector").hide();
+        $("#instructions").show();
+        $("#instructions").html('<img src="Images/letter'+teacherInput+'.jpg" style="width:200px; height:200px;">');
         output.show();
         Leap.loop(options, function(frame) {
             finalString = "";
@@ -195,7 +201,7 @@ window.addEventListener('HTMLImportsLoaded', function(){
       }
   });
 
-  player.setHeight(150);
+  player.setHeight(300);
   player.startListening();
 });
 </script>
