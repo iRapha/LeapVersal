@@ -1,0 +1,18 @@
+body{
+  margin: 0px;
+  padding: 0px;
+  color:black;
+  font-family: 'Lato', sans-serif;
+}
+
+h1{
+  padding: 0px;
+  color: black;
+  text-align: center;
+  font-weight: 100;
+  font-size: 2em;
+}
+
+.button, .answer {
+  display: inline-block;
+}
