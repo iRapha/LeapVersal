@@ -1,14 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Empty gadget</title>
+<title>LeapVersal</title>
 <script src="bower_components/versal-component-runtime/dist/runtime.min.js"></script>
 <link rel="import" href="bower_components/versal-gadget-api/versal-gadget-api.html">
 </head>
 
 <body>
 
-<div id="output" style="min-height:600px;"></div>
+<div id="message">
+    <div id="message-text">
+    </div>
+    <br/><br/>
+    <select id="letter-selector" name="alphabet" style="display:inline-block;">
+        <option value="A">A</option>
+        <option value="B">B</option>
+        <option value="C">C</option>
+        <option value="D">D</option>
+        <option value="E">E</option>
+        <option value="F">F</option>
+        <option value="G">G</option>
+        <option value="H">H</option>
+        <option value="I">I</option>
+        <option value="J">J</option>
+        <option value="K">K</option>
+        <option value="L">L</option>
+        <option value="M">M</option>
+        <option value="N">N</option>
+        <option value="O">O</option>
+        <option value="P">P</option>
+        <option value="Q">Q</option>
+        <option value="R">R</option>
+        <option value="S">S</option>
+        <option value="T">T</option>
+        <option value="U">U</option>
+        <option value="V">V</option>
+        <option value="W">W</option>
+        <option value="X">X</option>
+        <option value="Y">Y</option>
+        <option value="Z">Z</option>
+    </select>
+</div>
+<div id="output"></div>
 
 <style>
 input {
@@ -28,6 +61,7 @@ input[readonly] {
 <script>
 //general vars
 var output = $("#output");
+var message = $("#message");
 var options = { enableGestured: true };
 //each element of "fingers" is a "closed-ness" measure. 0 is extended, 1 is semi, 2 is closed
 var alphabet = {
@@ -105,67 +139,62 @@ function getFingerStatus(finger, hand) {
     }
 }
 
-
-//#######
-var teacherInput = "a";
+var teacherInput = "A";
 var letter = alphabet[teacherInput.toUpperCase()];
-
-//main leap loop
-Leap.loop(options, function(frame) {
-    finalString = "";
-
-    for(var i = 0; i < frame.hands.length; i++) {
-        hand = frame.hands[i];
-        fingers = hand.fingers;
-
-        finalString += hand.palmNormal + "<br/><br/>";
-
-        for(var k = 0; k < fingers.length; k++) {
-            finger = fingers[k];
-
-            finalString += fingerNames[finger.type] + ": ";
-            finalString += getFingerStatus(finger, hand);
-            finalString += "<br/><br/>";
-
-        }
-    }
-
-    output.html(finalString);
-});
-//########
 
 window.addEventListener('HTMLImportsLoaded', function(){
 
-  var greeting = document.querySelector('[name=greeting]');
-  var learnerName = document.querySelector('[name=learnerName]');
+  var letterSelector = document.querySelector('[id=letter-selector]');
   var player = new VersalPlayerAPI();
 
-  greeting.addEventListener('change', function(e){
-    player.setAttribute(greeting.name, greeting.value);
+  letterSelector.addEventListener("blur", function() {
+      player.setAttributes({ "letterInput": letterSelector.value });
   });
 
-  learnerName.addEventListener('change', function(e){
-    player.setLearnerAttribute(learnerName.name, learnerName.value);
+  player.on('attributesChanged', function(attrs){
+     if(attrs && attrs.letterInput) {
+       teacherInput = attrs.letterInput;
+       letter = alphabet[teacherInput.toUpperCase()];
+     }
   });
 
-  player.on('attributesChanged', function(data){
-    if(data.greeting) {
-      greeting.value = data.greeting;
-    };
+  player.on('editableChanged', function(editableObj){
+      if(editableObj.editable) {
+        //stuff for author
+        $("#message-text").text("Which letter would you like to teach in American Sign Language with the Leap Motion?");
+        $("#letter-selector").show();
+        output.hide;
+      } else {
+        //stuff for learner
+        $("#message-text").text("Please use your Leap Motion to do the letter " + teacherInput.toUpperCase() + " in American Sign Language.");
+        $("#letter-selector").hide();
+        output.show();
+        Leap.loop(options, function(frame) {
+            finalString = "";
+
+            for(var i = 0; i < frame.hands.length; i++) {
+                hand = frame.hands[i];
+                fingers = hand.fingers;
+
+                finalString += hand.palmNormal + "<br/><br/>";
+
+                for(var k = 0; k < fingers.length; k++) {
+                    finger = fingers[k];
+
+                    finalString += fingerNames[finger.type] + ": ";
+                    finalString += getFingerStatus(finger, hand);
+                    finalString += "<br/><br/>";
+
+                }
+            }
+
+            output.html(finalString);
+        });
+            //once all are ok, stop demo and display success message
+      }
   });
 
-  player.on('learnerStateChanged', function(data){
-    if(data.learnerName) {
-      learnerName.value = data.learnerName;
-    };
-  });
-
-  player.on('editableChanged', function(editable){
-    greeting.readOnly = !editable.editable;
-    learnerName.readOnly = editable.editable;
-  });
-
-  player.setHeight(60);
+  player.setHeight(150);
   player.startListening();
 });
 </script>
