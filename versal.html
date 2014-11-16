@@ -200,7 +200,7 @@ window.addEventListener('HTMLImportsLoaded', function(){
     controller.connect();
     controller.on('connect', function() {
         timeout = window.setTimeout(function(){
-            output.html('<h1 style="color:red;">Oops. No Leap Motion device connected!</h1>');
+            output.html('<h1 style="color:red; font-size:1.2em; font-weight:bold; padding-top:20px;">Oops. No Leap Motion device connected!</h1>');
         }, 500);
         //check for valid frame
         function validateFrame() {
@@ -214,7 +214,7 @@ window.addEventListener('HTMLImportsLoaded', function(){
     });
 
     controller.on('deviceStopped', function() {
-        output.html('<h1 style="color:red;">Oops. No Leap Motion device connected!</h1>');
+        output.html('<h1 style="color:red; font-size:1.2em; font-weight:bold; padding-top:20px;">Oops. No Leap Motion device connected!</h1>');
     });
 
     controller.on('deviceStreaming', function() {
